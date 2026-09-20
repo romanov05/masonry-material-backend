@@ -1,0 +1,488 @@
+:root {
+  /* ============================================================
+     ЦВЕТА
+     ============================================================ */
+  --masonry-material-color-primary: rgb(33, 123, 0);      /* основной зеленый цвет для кнопок */
+  --masonry-material-color-primary-dark: #1a6200;         /* темно-зеленый цвет для hover */
+  --masonry-material-color-surface: #FFFFFF;              /* белый фон карточек, форм, панели вкладок, полей ввода */
+  --masonry-material-color-bg: #F4F4F4;                   /* фон страницы вокруг "экрана"-контейнера */
+  --masonry-material-color-text: rgb(51, 51, 51);         /* основной темный текст (Добавление, Плитка) */
+  --masonry-material-color-text-muted: rgb(85, 85, 85);   /* приглушенный серый — подписи, "Расход" и лайк на карточках */
+  --masonry-material-color-border: rgb(229, 229, 229);    /* границы полей, карточек */
+
+  /* ============================================================
+     РАЗМЕРЫ / СКРУГЛЕНИЯ
+     ============================================================ */
+  --masonry-material-radius-card: 16px;     /* скругление карточек в Плитке */
+  --masonry-material-radius-pill: 10px;     /* скругление кнопок */
+  --masonry-material-radius-input: 8px;     /* скругление текстовых полей на Добавлении */
+  --masonry-material-tabbar-height: 76px;   /* высота нижней панели вкладок */
+
+  /* ============================================================
+     ШРИФТ
+     ============================================================ */
+  --masonry-material-font: 'Manrope', sans-serif;   /* глобальный шрифт */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--masonry-material-font);
+  color: var(--masonry-material-color-text);
+  background: var(--masonry-material-color-bg);
+}
+
+a {
+  color: inherit;
+}
+
+/* ==========================================================================
+   Контейнер-экран (общий для всех трех страниц)
+   ========================================================================== */
+
+.masonry-material-screen {
+  position: relative;
+  max-width: 420px;          /* ширина экрана */
+  min-height: 100vh;
+  margin: 0 auto;
+  background: var(--masonry-material-color-surface);
+  padding-bottom: var(--masonry-material-tabbar-height);
+  overflow: hidden;
+}
+
+.masonry-material-screen--feed {
+  height: 100vh;
+  min-height: 100vh;
+  padding-bottom: 0;
+}
+
+/* ==========================================================================
+   Нижняя панель вкладок (на всех страницах)
+   ========================================================================== */
+
+.masonry-material-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
+  height: var(--masonry-material-tabbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: var(--masonry-material-color-surface);
+  border-top: 1px solid var(--masonry-material-color-border);
+  z-index: 10;
+}
+
+.masonry-material-tabbar__item {
+  color: var(--masonry-material-color-text-muted);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.masonry-material-tabbar__item:hover {
+  color: var(--masonry-material-color-primary-dark);    /* цвет пункта меню при наведении */
+}
+
+.masonry-material-tabbar__item--active {
+  color: var(--masonry-material-color-primary);         /* цвет активного (текущего) пункта меню */
+}
+
+/* ==========================================================================
+   Общие кнопки (используется на Плитке для "Найти")
+   ========================================================================== */
+
+.masonry-material-btn {
+  display: inline-block;
+  border: none;
+  border-radius: var(--masonry-material-radius-pill);
+  padding: 12px 22px;           /* внутренние отступы кнопки */
+  font-weight: 700;
+  font-size: 14px;              /* размер текста кнопки */
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.masonry-material-btn--search {
+  background: var(--masonry-material-color-primary);
+  color: #fff;
+}
+
+.masonry-material-btn--search:hover {
+  background: var(--masonry-material-color-primary-dark);   /* hover кнопки "Найти" */
+}
+
+/* ==========================================================================
+   СТРАНИЦА "ЛЕНТА"
+   ========================================================================== */
+
+.masonry-material-feed__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+  z-index: 0;
+}
+
+.masonry-material-feed__overlay {
+  position: absolute;
+  inset: 0;
+  bottom: var(--masonry-material-tabbar-height);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 20px;                   /* расстояние между блоком "поля + иконки" и блоком "название + описание" */
+  padding: 24px 16px;
+}
+
+.masonry-material-feed__side {
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;                   /* расстояние между полями (раствор/расход) и иконками (лайк/следующий) */
+}
+
+.masonry-material-feed__fields {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  color: #fff;                  /* белый текст */
+  font-size: 14px;                /* размер текста "Раствор"/"Расход" */
+  font-weight: 600;
+  text-align: right;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);   /* тень для читаемости на светлом видео */
+}
+
+.masonry-material-feed__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;                /* расстояние между иконкой лайка и иконкой "следующий" */
+}
+
+.masonry-material-icon-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #fff;                  /* цвет иконок лайка/следующего */
+  cursor: pointer;
+  text-decoration: none;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.55));   /* тень для читаемости */
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.masonry-material-icon-btn:hover {
+  transform: scale(1.1);        /* эффект наведения на иконку */
+}
+
+.masonry-material-icon-btn svg {
+  width: 30px;                  /* размер иконки лайка */
+  height: 30px;
+}
+
+.masonry-material-icon-btn--next svg {
+  width: 26px;                  /* размер иконки "следующий" */
+  height: 26px;
+}
+
+.masonry-material-like-count {
+  font-size: 14px;              /* размер числа лайков под сердцем */
+  font-weight: 700;
+}
+
+.masonry-material-feed__text {
+  color: #fff;                                    /* белый текст названия/описания */
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);      /* тень для читаемости */
+  max-height: 38vh;
+  overflow-y: auto;
+}
+
+.masonry-material-feed__title {
+  margin: 0 0 8px;
+  font-size: 20px;               /* размер названия материала */
+  font-weight: 700;
+}
+
+.masonry-material-feed__description {
+  margin: 0;
+  font-size: 14px;               /* размер текста описания */
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;         /* сколько строк видно в свернутом состоянии */
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Чекбокс "больше/меньше" */
+.masonry-material-desc-toggle-input {
+  display: none;
+}
+
+.masonry-material-desc-toggle-input:checked ~ .masonry-material-feed__description {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
+.masonry-material-desc-toggle-label {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.masonry-material-desc-toggle-less {
+  display: none;
+}
+
+.masonry-material-desc-toggle-input:checked ~ .masonry-material-desc-toggle-label .masonry-material-desc-toggle-more {
+  display: none;
+}
+
+.masonry-material-desc-toggle-input:checked ~ .masonry-material-desc-toggle-label .masonry-material-desc-toggle-less {
+  display: inline;
+}
+
+/* ==========================================================================
+   СТРАНИЦА "ДОБАВЛЕНИЕ"
+   ========================================================================== */
+
+.masonry-material-form__title {
+  text-align: center;
+  padding: 24px 0 8px;
+  margin: 0;
+  font-size: 20px;   /* размер заголовка "Черновик" */
+  font-weight: 700;
+}
+
+.masonry-material-form__section {
+  padding: 0 20px 12px;
+}
+
+.masonry-material-form__label {
+  display: block;
+  font-weight: 700;
+  margin: 16px 0 8px;
+}
+
+.masonry-material-form__input,
+.masonry-material-form__textarea {
+  width: 100%;
+  border: 1px solid var(--masonry-material-color-border);
+  border-radius: var(--masonry-material-radius-input);
+  padding: 12px 16px;
+  font-size: 14px;               /* размер текста в полях "Название"/"Описание"/"Раствор"/"Расход" */
+  font-family: inherit;
+  background: var(--masonry-material-color-surface);
+  color: var(--masonry-material-color-text);
+}
+
+.masonry-material-form__textarea {
+  min-height: 90px;              /* высота поля "Описание" */
+  resize: none;
+}
+
+.masonry-material-file-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;                      /* расстояние между картинкой-плейсхолдером и полем выбора файла */
+  margin-bottom: 20px;           /* отступ до следующего поля формы */
+}
+
+.masonry-material-file-input {
+  order: 2;
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 64px;
+  padding: 4px 0 0;
+  border: none;
+  font-size: 13px;
+  color: var(--masonry-material-color-text-muted);
+  background: none;
+  overflow: hidden;
+}
+
+.masonry-material-file-input::file-selector-button {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--masonry-material-radius-pill);
+  background: var(--masonry-material-color-primary);    /* цвет кнопки "Выбрать файл" */
+  color: #fff;
+  font-size: 14px;             /* размер текста кнопки */
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.masonry-material-file-input::file-selector-button:hover {
+  background: var(--masonry-material-color-primary-dark);   /* hover кнопки выбора файла */
+}
+
+.masonry-material-file-input::-webkit-file-upload-button {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--masonry-material-radius-pill);
+  background: var(--masonry-material-color-primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Плейсхолдер-картинка */
+.masonry-material-file-preview {
+  order: 1;
+  display: none;
+  width: 72px;                   /* размер плейсхолдера */
+  height: 72px;
+  color: var(--masonry-material-color-primary);   /* цвет плейсхолдер-иконки */
+}
+
+.masonry-material-file-input:valid ~ .masonry-material-file-preview {
+  display: block;
+}
+
+/* ==========================================================================
+   СТРАНИЦА "ПЛИТКА"
+   ========================================================================== */
+
+.masonry-material-tiles__title {
+  padding: 24px 20px 12px;
+  font-size: 20px;                /* размер заголовка "Фильтрация: расход..." */
+  margin: 0;
+}
+
+.masonry-material-tiles__search {
+  display: flex;
+  align-items: center;
+  gap: 12px;                      /* расстояние между ползунком, числом и кнопкой "Найти" */
+  flex-wrap: wrap;
+  padding: 0 20px 20px;
+}
+
+.masonry-material-tiles__search-input {
+  flex: 1;
+  min-width: 140px;
+  accent-color: var(--masonry-material-color-primary);    /* базовый цвет слайдера в современных браузерах */
+}
+
+.masonry-material-tiles__search-input::-webkit-slider-runnable-track {
+  height: 4px;                    /* толщина дорожки ползунка */
+  border-radius: 2px;
+  background: var(--masonry-material-color-border);   /* цвет дорожки */
+}
+
+.masonry-material-tiles__search-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;                    /* размер бегунка ползунка */
+  height: 18px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: var(--masonry-material-color-primary);    /* цвет бегунка */
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.masonry-material-tiles__search-input::-webkit-slider-thumb:hover {
+  background: var(--masonry-material-color-primary-dark);   /* hover бегунка */
+}
+
+.masonry-material-tiles__search-input::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--masonry-material-color-border);
+}
+
+.masonry-material-tiles__search-input::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: var(--masonry-material-color-primary);
+  cursor: pointer;
+}
+
+.masonry-material-tiles__search-value {
+  min-width: 34px;
+  font-weight: 700;
+  font-size: 14px;              /* размер числа рядом с ползунком */
+  color: var(--masonry-material-color-primary);   /* цвет числа */
+  text-align: right;
+}
+
+.masonry-material-tiles__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;   /* количество колонок сетки карточек */
+  gap: 16px;                        /* расстояние между карточками */
+  padding: 0 20px;
+}
+
+.masonry-material-card {
+  display: block;
+  border: 1px solid var(--masonry-material-color-border);
+  border-radius: var(--masonry-material-radius-card);
+  padding: 14px;                    /* внутренние отступы карточки */
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.masonry-material-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);   /* тень карточки при наведении */
+  border-color: #217b00;                        /* цвет рамки карточки при наведении */
+}
+
+.masonry-material-card__image {
+  width: 100%;
+  height: 90px;                    /* высота картинки в карточке */
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.masonry-material-card__name {
+  font-weight: 700;
+  font-size: 14px;                 /* размер названия материала в карточке */
+  margin-bottom: 8px;
+}
+
+.masonry-material-card__consumption {
+  font-size: 13px;                 /* размер текста "Расход" в карточке */
+  color: var(--masonry-material-color-text-muted);
+  margin-bottom: 6px;
+}
+
+.masonry-material-card__likes {
+  font-size: 14px;                 /* размер числа лайков в карточке */
+  color: var(--masonry-material-color-text-muted);    /* серый, того же цвета, что и "Расход" */
+}
