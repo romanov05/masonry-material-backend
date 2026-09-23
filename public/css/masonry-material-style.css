@@ -308,8 +308,19 @@ a {
 .masonry-material-file-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;                      /* расстояние между картинкой-плейсхолдером и полем выбора файла */
+  gap: 8px;                      /* расстояние между картинкой и полем выбора файла */
   margin-bottom: 20px;           /* отступ до следующего поля формы */
+}
+
+/* Картинка-плейсхолдер */
+.masonry-material-file-preview {
+  order: 1;
+  display: none;                 /* скрыта, пока файл не выбран */
+  width: 100%;
+  max-width: 160px;              /* размер плейсхолдера */
+  height: 120px;                 /* высота плейсхолдера */
+  object-fit: cover;
+  border-radius: var(--masonry-material-radius-input);
 }
 
 .masonry-material-file-input {
@@ -333,9 +344,9 @@ a {
   padding: 8px 14px;
   border: none;
   border-radius: var(--masonry-material-radius-pill);
-  background: var(--masonry-material-color-primary);    /* цвет кнопки "Выбрать файл" */
+  background: var(--masonry-material-color-primary);   /* цвет кнопки "Выбрать файл" */
   color: #fff;
-  font-size: 14px;             /* размер текста кнопки */
+  font-size: 13px;                /* размер текста кнопки */
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.15s ease;
@@ -357,15 +368,6 @@ a {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-}
-
-/* Плейсхолдер-картинка */
-.masonry-material-file-preview {
-  order: 1;
-  display: none;
-  width: 72px;                   /* размер плейсхолдера */
-  height: 72px;
-  color: var(--masonry-material-color-primary);   /* цвет плейсхолдер-иконки */
 }
 
 .masonry-material-file-input:valid ~ .masonry-material-file-preview {
