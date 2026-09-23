@@ -308,8 +308,19 @@ a {
 .masonry-material-file-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;                      /* расстояние между картинкой-плейсхолдером и полем выбора файла */
+  gap: 8px;                      /* расстояние между картинкой и полем выбора файла */
   margin-bottom: 20px;           /* отступ до следующего поля формы */
+}
+
+/* Картинка-плейсхолдер */
+.masonry-material-file-preview {
+  order: 1;
+  display: none;                 /* скрыта, пока файл не выбран */
+  width: 100%;
+  max-width: 160px;              /* размер плейсхолдера */
+  height: 120px;                 /* высота плейсхолдера */
+  object-fit: cover;
+  border-radius: var(--masonry-material-radius-input);
 }
 
 .masonry-material-file-input {
@@ -333,9 +344,9 @@ a {
   padding: 8px 14px;
   border: none;
   border-radius: var(--masonry-material-radius-pill);
-  background: var(--masonry-material-color-primary);    /* цвет кнопки "Выбрать файл" */
+  background: var(--masonry-material-color-primary);   /* цвет кнопки "Выбрать файл" */
   color: #fff;
-  font-size: 14px;             /* размер текста кнопки */
+  font-size: 13px;                /* размер текста кнопки */
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.15s ease;
@@ -357,15 +368,6 @@ a {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-}
-
-/* Плейсхолдер-картинка */
-.masonry-material-file-preview {
-  order: 1;
-  display: none;
-  width: 72px;                   /* размер плейсхолдера */
-  height: 72px;
-  color: var(--masonry-material-color-primary);   /* цвет плейсхолдер-иконки */
 }
 
 .masonry-material-file-input:valid ~ .masonry-material-file-preview {
@@ -485,4 +487,36 @@ a {
 .masonry-material-card__likes {
   font-size: 14px;                 /* размер числа лайков в карточке */
   color: var(--masonry-material-color-text-muted);    /* серый, того же цвета, что и "Расход" */
+}
+
+/* ==========================================================================
+   Кнопка логического удаления на карточке в Плитке
+   ========================================================================== */
+
+.masonry-material-card-wrapper {
+  position: relative;
+}
+
+.masonry-material-card__delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+
+.masonry-material-card__delete-btn {
+  width: 28px;                     /* размер кнопки удаления */
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(28, 28, 28, 0.55);   /* полупрозрачный тёмный фон */
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.masonry-material-card__delete-btn:hover {
+  background: #C0392B;             /* цвет кнопки удаления при наведении */
 }

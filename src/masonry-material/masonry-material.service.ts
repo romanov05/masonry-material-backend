@@ -1,63 +1,114 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { masonryMaterialCollection } from './masonry-material.data';
-import { MasonryMaterial } from './masonry-material.model';
+import { InjectRepository } from '@nestjs/typeorm';
+import { LessThanOrEqual, MoreThan, Repository } from 'typeorm';
+import { MasonryMaterialServiceEntity } from './entities/masonry-material-service.entity';
+import { MasonryMaterialLikeEntity } from './entities/masonry-material-like.entity';
 
 @Injectable()
 export class MasonryMaterialService {
-  private readonly collection: MasonryMaterial[] = masonryMaterialCollection;
+  constructor(
+    @InjectRepository(MasonryMaterialServiceEntity)
+    private readonly materialRepository: Repository<MasonryMaterialServiceEntity>,
+    @InjectRepository(MasonryMaterialLikeEntity)
+    private readonly likeRepository: Repository<MasonryMaterialLikeEntity>,
+  ) {}
 
-  private getVisible(): MasonryMaterial[] {
-    return this.collection.filter((item) => item.status !== 'deleted');
+  async getLikesCount(serviceId: number): Promise<number> {
+    return this.likeRepository.count({ where: { serviceId } });
   }
 
-  private getPublished(): MasonryMaterial[] {
-    return this.getVisible().filter((item) => item.status === 'published');
+  /** ORM, одна строка: черновик текущего пользователя (или null, если его нет) */
+  async findDraftByUser(userId: number): Promise<MasonryMaterialServiceEntity | null> {
+    return this.materialRepository.findOne({ where: { creatorId: userId, status: 'draft' } });
   }
 
-  getLikesCount(item: MasonryMaterial): number {
-    return item.likedByUserIds.length;
-  }
-
-  getDraft(): MasonryMaterial {
-    const draft = this.collection.find((item) => item.status === 'draft');
-    if (!draft) {
-      throw new NotFoundException('Черновик не найден');
+  /** ORM: создание черновика — только если у пользователя его ещё нет ("Далее") */
+  async createDraftIfMissing(userId: number, name: string): Promise<void> {
+    const existing = await this.findDraftByUser(userId);
+    if (existing) {
+      return;
     }
-    return draft;
+    const draft = this.materialRepository.create({
+      name: name?.trim() || 'Новая услуга',
+      status: 'draft',
+      creatorId: userId,
+    });
+    await this.materialRepository.save(draft);
   }
 
-  getPublishedList(maxConsumption?: string): MasonryMaterial[] {
-    const published = this.getPublished();
-    if (!maxConsumption) {
-      return published;
-    }
-    const limit = Number(maxConsumption);
+  /** ORM: публикация черновика ("Опубликовать") — смена статуса + заполнение полей */
+  async publish(
+    id: number,
+    userId: number,
+    fields: { shortDescription: string; mortarPerM3: number; consumptionPerM3: number },
+  ): Promise<void> {
+    await this.materialRepository.update(
+      { id, creatorId: userId, status: 'draft' },
+      {
+        status: 'published',
+        shortDescription: fields.shortDescription,
+        mortarPerM3: fields.mortarPerM3,
+        consumptionPerM3: fields.consumptionPerM3,
+        publishedAt: new Date(),
+      },
+    );
+  }
+
+  /** ORM: список опубликованных услуг с фильтром "расход не более X" */
+  async getPublishedList(maxConsumption?: string): Promise<MasonryMaterialServiceEntity[]> {
+    const limit = maxConsumption ? Number(maxConsumption) : NaN;
     if (Number.isNaN(limit)) {
-      return published;
+      return this.materialRepository.find({ where: { status: 'published' }, order: { id: 'ASC' } });
     }
-    return published.filter((item) => item.consumptionPerM3 <= limit);
+    return this.materialRepository.find({
+      where: { status: 'published', consumptionPerM3: LessThanOrEqual(limit) },
+      order: { id: 'ASC' },
+    });
   }
 
-  getFeedItem(id?: number, next = false): MasonryMaterial {
-    const published = this.getPublished();
-    if (published.length === 0) {
-      throw new NotFoundException('Нет опубликованных услуг');
-    }
-
+  /** ORM, лента — каждая ветка забирает из БД РОВНО одну строку */
+  async getFeedItem(id?: number, next = false): Promise<MasonryMaterialServiceEntity> {
     if (id === undefined) {
-      return published[0];
-    }
-
-    const currentIndex = published.findIndex((item) => item.id === id);
-    if (currentIndex === -1) {
-      throw new NotFoundException(`Услуга с id=${id} не найдена среди опубликованных`);
+      const first = await this.materialRepository.findOne({
+        where: { status: 'published' },
+        order: { id: 'ASC' },
+      });
+      if (!first) {
+        throw new NotFoundException('Нет опубликованных услуг');
+      }
+      return first;
     }
 
     if (next) {
-      const nextIndex = (currentIndex + 1) % published.length;
-      return published[nextIndex];
+      const nextItem = await this.materialRepository.findOne({
+        where: { status: 'published', id: MoreThan(id) },
+        order: { id: 'ASC' },
+      });
+      if (nextItem) {
+        return nextItem;
+      }
+      const first = await this.materialRepository.findOne({
+        where: { status: 'published' },
+        order: { id: 'ASC' },
+      });
+      if (!first) {
+        throw new NotFoundException('Нет опубликованных услуг');
+      }
+      return first;
     }
 
-    return published[currentIndex];
+    const item = await this.materialRepository.findOne({ where: { id, status: 'published' } });
+    if (!item) {
+      throw new NotFoundException(`Услуга с id=${id} не найдена среди опубликованных`);
+    }
+    return item;
+  }
+
+  /** Логическое удаление: чистый SQL UPDATE через курсор */
+  async softDeleteViaRawSql(id: number): Promise<void> {
+    await this.materialRepository.query(
+      `UPDATE masonry_material_services SET status = 'deleted' WHERE id = $1`,
+      [id],
+    );
   }
 }

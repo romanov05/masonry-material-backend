@@ -9,9 +9,12 @@
 <body>
   <div class="masonry-material-screen masonry-material-screen--feed">
 
-    <video class="masonry-material-feed__video"
-           src="{{mediaUrl item.videoKey}}"
-           autoplay loop muted playsinline></video>
+    <video class="masonry-material-feed__video" autoplay loop muted playsinline>
+      {{#if item.videoUrl}}
+        <source src="{{item.videoUrl}}">
+      {{/if}}
+      <source src="/video/masonry-material-default.mp4">
+    </video>
 
     <div class="masonry-material-feed__overlay">
 
@@ -43,7 +46,7 @@
       <div class="masonry-material-feed__text">
         <input type="checkbox" id="masonry-material-desc-toggle" class="masonry-material-desc-toggle-input">
         <h2 class="masonry-material-feed__title">{{item.name}}</h2>
-        <p class="masonry-material-feed__description">{{item.description}}</p>
+        <p class="masonry-material-feed__description">{{item.shortDescription}}</p>
         <label for="masonry-material-desc-toggle" class="masonry-material-desc-toggle-label">
           <span class="masonry-material-desc-toggle-more">больше</span>
           <span class="masonry-material-desc-toggle-less">меньше</span>
