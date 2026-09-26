@@ -162,12 +162,14 @@ a {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 6px;
-  color: #fff;                  /* белый текст */
-  font-size: 14px;                /* размер текста "Раствор"/"Расход" */
+  gap: 4px;
+  max-width: 150px;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.3;
   font-weight: 600;
   text-align: right;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);   /* тень для читаемости на светлом видео */
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
 }
 
 .masonry-material-feed__actions {
@@ -308,58 +310,50 @@ a {
 .masonry-material-file-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;                      /* расстояние между картинкой и полем выбора файла */
+  gap: 8px;                      /* расстояние между картинкой/видео и полем выбора файла */
   margin-bottom: 20px;           /* отступ до следующего поля формы */
 }
 
-/* Картинка-плейсхолдер */
+/* Картинка или видео по умолчанию */
 .masonry-material-file-preview {
-  order: 1;
-  display: none;                 /* скрыта, пока файл не выбран */
-  width: 100%;
-  max-width: 160px;              /* размер плейсхолдера */
-  height: 120px;                 /* высота плейсхолдера */
-  object-fit: cover;
-  border-radius: var(--masonry-material-radius-input);
-}
-
-.masonry-material-file-input {
-  order: 2;
-  position: relative;
   display: block;
   width: 100%;
-  height: 64px;
-  padding: 4px 0 0;
+  max-width: 170px;              /* размер превью */
+  height: 130px;                 /* высота превью */
+  object-fit: cover;
+  border-radius: var(--masonry-material-radius-input);
+  background: #000;
+}
+
+/* Поле выбора файла */
+.masonry-material-file-input {
+  width: 100%;
+  padding: 4px 0;
   border: none;
-  font-size: 13px;
+  font-size: 13px;                /* размер текста с именем файла рядом с кнопкой */
   color: var(--masonry-material-color-text-muted);
   background: none;
-  overflow: hidden;
 }
 
 .masonry-material-file-input::file-selector-button {
-  position: absolute;
-  left: 0;
-  bottom: 0;
+  margin-right: 12px;
   padding: 8px 14px;
   border: none;
   border-radius: var(--masonry-material-radius-pill);
   background: var(--masonry-material-color-primary);   /* цвет кнопки "Выбрать файл" */
   color: #fff;
-  font-size: 13px;                /* размер текста кнопки */
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .masonry-material-file-input::file-selector-button:hover {
-  background: var(--masonry-material-color-primary-dark);   /* hover кнопки выбора файла */
+  background: var(--masonry-material-color-primary-dark);
 }
 
 .masonry-material-file-input::-webkit-file-upload-button {
-  position: absolute;
-  left: 0;
-  bottom: 0;
+  margin-right: 12px;
   padding: 8px 14px;
   border: none;
   border-radius: var(--masonry-material-radius-pill);
@@ -368,10 +362,6 @@ a {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-}
-
-.masonry-material-file-input:valid ~ .masonry-material-file-preview {
-  display: block;
 }
 
 /* ==========================================================================
@@ -446,17 +436,18 @@ a {
 .masonry-material-tiles__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;   /* количество колонок сетки карточек */
+  grid-auto-rows: 270px;            /* фиксированная высота строки */
   gap: 16px;                        /* расстояние между карточками */
   padding: 0 20px;
 }
 
 .masonry-material-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;                         /* расстояние между кликабельной частью карточки и кнопкой "Удалить" */
   border: 1px solid var(--masonry-material-color-border);
   border-radius: var(--masonry-material-radius-card);
   padding: 14px;                    /* внутренние отступы карточки */
-  text-decoration: none;
-  color: inherit;
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
@@ -465,17 +456,33 @@ a {
   border-color: #217b00;                        /* цвет рамки карточки при наведении */
 }
 
+.masonry-material-card__link {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
 .masonry-material-card__image {
   width: 100%;
   height: 90px;                    /* высота картинки в карточке */
   object-fit: contain;
   margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .masonry-material-card__name {
   font-weight: 700;
   font-size: 14px;                 /* размер названия материала в карточке */
   margin-bottom: 8px;
+  min-height: 36px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }
 
 .masonry-material-card__consumption {
@@ -486,37 +493,11 @@ a {
 
 .masonry-material-card__likes {
   font-size: 14px;                 /* размер числа лайков в карточке */
-  color: var(--masonry-material-color-text-muted);    /* серый, того же цвета, что и "Расход" */
+  color: var(--masonry-material-color-text-muted);
 }
 
-/* ==========================================================================
-   Кнопка логического удаления на карточке в Плитке
-   ========================================================================== */
-
-.masonry-material-card-wrapper {
-  position: relative;
-}
-
-.masonry-material-card__delete {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 2;
-}
-
-.masonry-material-card__delete-btn {
-  width: 28px;                     /* размер кнопки удаления */
-  height: 28px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(28, 28, 28, 0.55);   /* полупрозрачный тёмный фон */
-  color: #fff;
-  font-size: 14px;
-  line-height: 1;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.masonry-material-card__delete-btn:hover {
-  background: #C0392B;             /* цвет кнопки удаления при наведении */
+/* Кнопка "Удалить" */
+.masonry-material-card__delete-form .masonry-material-btn {
+  display: block;
+  width: 100%;
 }
