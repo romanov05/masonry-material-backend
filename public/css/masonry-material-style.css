@@ -171,6 +171,7 @@ a {
   text-align: right;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
 }
+
 .masonry-material-feed__actions {
   display: flex;
   flex-direction: column;
@@ -435,7 +436,7 @@ a {
 .masonry-material-tiles__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;   /* количество колонок сетки карточек */
-  grid-auto-rows: 220px;            /* фиксированная высота строки */
+  grid-auto-rows: 270px;            /* фиксированная высота строки */
   gap: 16px;                        /* расстояние между карточками */
   padding: 0 20px;
 }
@@ -443,19 +444,25 @@ a {
 .masonry-material-card {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 0;
+  gap: 8px;                         /* расстояние между кликабельной частью карточки и кнопкой "Удалить" */
   border: 1px solid var(--masonry-material-color-border);
   border-radius: var(--masonry-material-radius-card);
   padding: 14px;                    /* внутренние отступы карточки */
-  text-decoration: none;
-  color: inherit;
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .masonry-material-card:hover {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);   /* тень карточки при наведении */
   border-color: #217b00;                        /* цвет рамки карточки при наведении */
+}
+
+.masonry-material-card__link {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  text-decoration: none;
+  color: inherit;
 }
 
 .masonry-material-card__image {
@@ -487,4 +494,10 @@ a {
 .masonry-material-card__likes {
   font-size: 14px;                 /* размер числа лайков в карточке */
   color: var(--masonry-material-color-text-muted);
+}
+
+/* Кнопка "Удалить" */
+.masonry-material-card__delete-form .masonry-material-btn {
+  display: block;
+  width: 100%;
 }

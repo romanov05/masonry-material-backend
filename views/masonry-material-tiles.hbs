@@ -27,12 +27,24 @@
 
     <div class="masonry-material-tiles__grid">
       {{#each items}}
-        <a href="/masonry-material/feed/{{this.id}}" class="masonry-material-card">
-          <img class="masonry-material-card__image" src="{{mediaUrl this.imageKey}}" alt="{{this.name}}">
-          <div class="masonry-material-card__name">{{this.name}}</div>
-          <div class="masonry-material-card__consumption">Расход (в шт./м³): {{this.consumptionPerM3}}</div>
-          <div class="masonry-material-card__likes">❤ {{this.likesCount}}</div>
-        </a>
+        <div class="masonry-material-card">
+          <a href="/masonry-material/feed/{{this.id}}" class="masonry-material-card__link">
+            {{#if this.imageUrl}}
+              <object class="masonry-material-card__image" data="{{this.imageUrl}}">
+                <img class="masonry-material-card__image" src="/img/masonry-material-default-image.png" alt="{{this.name}}">
+              </object>
+            {{else}}
+              <img class="masonry-material-card__image" src="/img/masonry-material-default-image.png" alt="{{this.name}}">
+            {{/if}}
+            <div class="masonry-material-card__name">{{this.name}}</div>
+            <div class="masonry-material-card__consumption">Расход (в шт./м³): {{this.consumptionPerM3}}</div>
+            <div class="masonry-material-card__likes">❤ {{this.likesCount}}</div>
+          </a>
+          <form class="masonry-material-card__delete-form" action="/masonry-material/delete" method="post">
+            <input type="hidden" name="id" value="{{this.id}}">
+            <button type="submit" class="masonry-material-btn masonry-material-btn--search">Удалить</button>
+          </form>
+        </div>
       {{/each}}
     </div>
 

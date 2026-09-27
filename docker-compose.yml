@@ -13,5 +13,27 @@ services:
       - masonry-material-minio-data:/data
     command: server /data --console-address ":9001"
 
+
+  masonry-material-postgres:
+    container_name: masonry-material-postgres
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: masonry_material_user
+      POSTGRES_PASSWORD: masonry_material_password
+      POSTGRES_DB: masonry_material_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - masonry-material-postgres-data:/var/lib/postgresql
+
+  masonry-material-adminer:
+    container_name: masonry-material-adminer
+    image: adminer:latest
+    ports:
+      - "8081:8080"
+    depends_on:
+      - masonry-material-postgres
+
 volumes:
   masonry-material-minio-data:
+  masonry-material-postgres-data:
