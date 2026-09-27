@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Плитка — Кладочные материалы</title>
+  <link rel="stylesheet" href="/css/masonry-material-style.css">
+</head>
+<body>
+  <div class="masonry-material-screen">
+    <h1 class="masonry-material-tiles__title">Фильтрация: расход (в шт./м³) до</h1>
+
+    <form class="masonry-material-tiles__search" action="/masonry-material/tiles" method="get">
+      <input
+        class="masonry-material-tiles__search-input"
+        type="range"
+        id="masonry-material-consumption-range"
+        name="search"
+        min="0"
+        max="400"
+        step="1"
+        value="{{search}}">
+      <output class="masonry-material-tiles__search-value"
+              for="masonry-material-consumption-range">{{search}}</output>
+      <button class="masonry-material-btn masonry-material-btn--search" type="submit">Найти</button>
+    </form>
+
+    <div class="masonry-material-tiles__grid">
+      {{#each items}}
+        <a href="/masonry-material/feed/{{this.id}}" class="masonry-material-card">
+          <img class="masonry-material-card__image" src="{{mediaUrl this.imageKey}}" alt="{{this.name}}">
+          <div class="masonry-material-card__name">{{this.name}}</div>
+          <div class="masonry-material-card__consumption">Расход (в шт./м³): {{this.consumptionPerM3}}</div>
+          <div class="masonry-material-card__likes">❤ {{this.likesCount}}</div>
+        </a>
+      {{/each}}
+    </div>
+
+    {{> masonry_material_tabbar}}
+  </div>
+</body>
+</html>

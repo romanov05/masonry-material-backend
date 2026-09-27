@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{item.name}} — Лента</title>
+  <link rel="stylesheet" href="/css/masonry-material-style.css">
+</head>
+<body>
+  <div class="masonry-material-screen masonry-material-screen--feed">
+
+    <video class="masonry-material-feed__video"
+           src="{{mediaUrl item.videoKey}}"
+           autoplay loop muted playsinline></video>
+
+    <div class="masonry-material-feed__overlay">
+
+      <div class="masonry-material-feed__side">
+        <div class="masonry-material-feed__fields">
+          <div>Раствор на 1 м³ (в м³): {{item.mortarPerM3}}</div>
+          <div>Расход (в шт./м³): {{item.consumptionPerM3}}</div>
+        </div>
+
+        <div class="masonry-material-feed__actions">
+          <div class="masonry-material-icon-btn masonry-material-icon-btn--like">
+            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 21s-6.716-4.35-9.428-8.485C.774 9.79 1.5 6 4.5 4.5 7 3.25 9.5 4 12 7c2.5-3 5-3.75 7.5-2.5 3 1.5 3.726 5.29 1.928 8.015C18.716 16.65 12 21 12 21z"/>
+            </svg>
+            <span class="masonry-material-like-count">{{likesCount}}</span>
+          </div>
+
+          <a href="/masonry-material/feed/{{item.id}}?next=true"
+             class="masonry-material-icon-btn masonry-material-icon-btn--next"
+             aria-label="Следующий">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 6 15 12 9 18"></polyline>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="masonry-material-feed__text">
+        <input type="checkbox" id="masonry-material-desc-toggle" class="masonry-material-desc-toggle-input">
+        <h2 class="masonry-material-feed__title">{{item.name}}</h2>
+        <p class="masonry-material-feed__description">{{item.description}}</p>
+        <label for="masonry-material-desc-toggle" class="masonry-material-desc-toggle-label">
+          <span class="masonry-material-desc-toggle-more">больше</span>
+          <span class="masonry-material-desc-toggle-less">меньше</span>
+        </label>
+      </div>
+
+    </div>
+
+    {{> masonry_material_tabbar}}
+  </div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Черновик — {{item.name}}</title>
+  <link rel="stylesheet" href="/css/masonry-material-style.css">
+</head>
+<body>
+  <div class="masonry-material-screen">
+    <h1 class="masonry-material-form__title">Черновик</h1>
+
+    <section class="masonry-material-form__section">
+      <label class="masonry-material-form__label" for="masonry-material-image-input">Изображение</label>
+      <div class="masonry-material-file-field">
+        <img class="masonry-material-file-preview"
+             src="/img/masonry-material-default-image.png" alt="Изображение по умолчанию">
+        <input type="file" accept="image/*" id="masonry-material-image-input"
+               class="masonry-material-file-input" required>
+      </div>
+
+      <label class="masonry-material-form__label" for="masonry-material-video-input">Видео</label>
+      <div class="masonry-material-file-field">
+        <video class="masonry-material-file-preview"
+               src="/video/masonry-material-default-video.mp4" autoplay loop muted playsinline></video>
+        <input type="file" accept="video/*" id="masonry-material-video-input"
+               class="masonry-material-file-input" required>
+      </div>
+    </section>
+
+    <section class="masonry-material-form__section">
+      <label class="masonry-material-form__label" for="masonry-material-name-input">Название</label>
+      <input class="masonry-material-form__input" type="text"
+             id="masonry-material-name-input" value="{{item.name}}">
+
+      <label class="masonry-material-form__label" for="masonry-material-description-input">Описание</label>
+      <textarea class="masonry-material-form__textarea"
+                id="masonry-material-description-input">{{item.description}}</textarea>
+
+      <label class="masonry-material-form__label" for="masonry-material-mortar-input">Раствор на 1 м³ (в м³)</label>
+      <input class="masonry-material-form__input" type="number"
+             id="masonry-material-mortar-input" value="{{item.mortarPerM3}}" min="0" step="0.001">
+
+      <label class="masonry-material-form__label" for="masonry-material-consumption-input">Расход (в шт./м³)</label>
+      <input class="masonry-material-form__input" type="number"
+             id="masonry-material-consumption-input" value="{{item.consumptionPerM3}}" min="0" step="1">
+    </section>
+
+    {{> masonry_material_tabbar}}
+  </div>
+</body>
+</html>
