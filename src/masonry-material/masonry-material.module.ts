@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MasonryMaterialController } from './masonry-material.controller';
 import { MasonryMaterialService } from './masonry-material.service';
+import { MasonryMaterialMinioService } from './masonry-material-minio.service';
 import { MasonryMaterialServiceEntity } from './entities/masonry-material-service.entity';
 import { MasonryMaterialUserEntity } from './entities/masonry-material-user.entity';
 import { MasonryMaterialLikeEntity } from './entities/masonry-material-like.entity';
@@ -15,6 +16,6 @@ import { MasonryMaterialLikeEntity } from './entities/masonry-material-like.enti
     ]),
   ],
   controllers: [MasonryMaterialController],
-  providers: [MasonryMaterialService],
+  providers: [MasonryMaterialService, MasonryMaterialMinioService],
 })
 export class MasonryMaterialModule {}

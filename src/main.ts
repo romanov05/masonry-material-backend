@@ -1,24 +1,26 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
 import { AppModule } from './app.module';
-
-const hbs = require('hbs');
+import { MasonryMaterialHttpExceptionFilter } from './masonry-material-http-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create(AppModule);
 
-  app.setBaseViewsDir(join(__dirname, '..', 'views'));
-  app.setViewEngine('hbs');
-  app.useStaticAssets(join(__dirname, '..', 'public'));
+  // /api в начале адреса каждого метода
+  app.setGlobalPrefix('api');
 
-  await new Promise<void>((resolve) => {
-    hbs.registerPartials(join(__dirname, '..', 'views', 'partials'), () => resolve());
-  });
+  // поля, которых нет в DTO (id, статус, создатель, даты), с клиента не принимаются → 400
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
-  hbs.registerHelper('eq', (a: unknown, b: unknown) => a === b);
+  app.useGlobalFilters(new MasonryMaterialHttpExceptionFilter());
 
   await app.listen(process.env.PORT ?? 3000);
-  console.log('masonry-material-app запущено на http://localhost:3000/masonry-material/feed');
+  console.log('masonry-material API: http://localhost:3000/api/masonry-materials');
 }
 bootstrap();

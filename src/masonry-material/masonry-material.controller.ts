@@ -1,90 +1,103 @@
 import {
+  BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
-  Redirect,
-  Render,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { MasonryMaterialService } from './masonry-material.service';
-import { MASONRY_MATERIAL_CURRENT_USER_ID } from './masonry-material.constants';
+import { getMasonryMaterialCurrentUserId } from '../masonry-material-current-user';
+import { MasonryMaterialUploadedFiles } from './masonry-material-uploaded-file';
+import { CreateMasonryMaterialDto } from './dto/create-masonry-material.dto';
+import { PublishMasonryMaterialDto } from './dto/publish-masonry-material.dto';
+import { LikeMasonryMaterialDto } from './dto/like-masonry-material.dto';
+import {
+  MasonryMaterialFeedQueryDto,
+  MasonryMaterialFiltersDto,
+} from './dto/masonry-material-query.dto';
 
-@Controller('masonry-material')
+@Controller('masonry-materials')
 export class MasonryMaterialController {
   constructor(private readonly masonryMaterialService: MasonryMaterialService) {}
 
+  // GET /api/masonry-materials?maxConsumption=200
+  @Get()
+  getList(@Query() filters: MasonryMaterialFiltersDto) {
+    return this.masonryMaterialService.getPublishedList(filters, getMasonryMaterialCurrentUserId());
+  }
+
+  // GET /api/masonry-materials/feed?id=2&next=true
   @Get('feed')
-  @Render('masonry-material-feed')
-  async getFeedDefault() {
-    const item = await this.masonryMaterialService.getFeedItem();
-    return {
-      item,
-      likesCount: await this.masonryMaterialService.getLikesCount(item.id),
-      activeTab: 'feed',
-    };
+  getFeed(@Query() query: MasonryMaterialFeedQueryDto) {
+    return this.masonryMaterialService.getFeedItem(query, getMasonryMaterialCurrentUserId());
   }
 
-  @Get('feed/:id')
-  @Render('masonry-material-feed')
-  async getFeedById(@Param('id', ParseIntPipe) id: number, @Query('next') next?: string) {
-    const item = await this.masonryMaterialService.getFeedItem(id, next === 'true');
-    return {
-      item,
-      likesCount: await this.masonryMaterialService.getLikesCount(item.id),
-      activeTab: 'feed',
-    };
-  }
-
+  // GET /api/masonry-materials/draft — id не указывается
   @Get('draft')
-  @Render('masonry-material-draft')
-  async getDraft() {
-    const draft = await this.masonryMaterialService.findDraftByUser(MASONRY_MATERIAL_CURRENT_USER_ID);
-    if (!draft) {
-      return { mode: 'create', activeTab: 'draft' };
+  getDraft() {
+    return this.masonryMaterialService.getDraft(getMasonryMaterialCurrentUserId());
+  }
+
+  // POST /api/masonry-materials — form-data: name, image (файл), video (файл)
+  @Post()
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'image', maxCount: 1 },
+        { name: 'video', maxCount: 1 },
+      ],
+      {
+        limits: { fileSize: 50 * 1024 * 1024 }, // 50 МБ
+        fileFilter: (_request, file, callback) => {
+          const isImage =
+            file.mimetype.startsWith('image/') || /\.(jpe?g|png|gif|webp)$/i.test(file.originalname);
+          const isVideo =
+            file.mimetype.startsWith('video/') || /\.(mp4|mov|webm|avi|mkv)$/i.test(file.originalname);
+          const isAllowed = file.fieldname === 'image' ? isImage : isVideo;
+
+          if (!isAllowed) {
+            return callback(new BadRequestException(), false);
+          }
+          callback(null, true);
+        },
+      },
+    ),
+  )
+  create(@Body() dto: CreateMasonryMaterialDto, @UploadedFiles() files: MasonryMaterialUploadedFiles) {
+    const image = files?.image?.[0];
+    const video = files?.video?.[0];
+    if (!image || !video) {
+      throw new BadRequestException();
     }
-    return { mode: 'publish', item: draft, activeTab: 'draft' };
+    return this.masonryMaterialService.createDraft(getMasonryMaterialCurrentUserId(), dto, image, video);
   }
 
-  @Get('tiles')
-  @Render('masonry-material-tiles')
-  async getTiles(@Query('search') search?: string) {
-    const items = await this.masonryMaterialService.getPublishedList(search);
-    const withLikes = await Promise.all(
-      items.map(async (item) => ({
-        ...item,
-        likesCount: await this.masonryMaterialService.getLikesCount(item.id),
-      })),
-    );
-    return { items: withLikes, search: search ?? '400', activeTab: 'tiles' };
+  // PUT /api/masonry-materials/:id/publish — черновик → опубликован
+  @Put(':id/publish')
+  publish(@Param('id', ParseIntPipe) id: number, @Body() dto: PublishMasonryMaterialDto) {
+    return this.masonryMaterialService.publish(id, getMasonryMaterialCurrentUserId(), dto);
   }
 
-  @Post('draft/next')
-  @Redirect('/masonry-material/draft', 302)
-  async createDraft(@Body('name') name: string) {
-    await this.masonryMaterialService.createDraftIfMissing(MASONRY_MATERIAL_CURRENT_USER_ID, name);
+  // DELETE /api/masonry-materials/:id — soft delete, ответ 200 без тела
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.masonryMaterialService.softDelete(id, getMasonryMaterialCurrentUserId());
   }
 
-  @Post('publish')
-  @Redirect('/masonry-material/tiles', 302)
-  async publish(
-    @Body('id', ParseIntPipe) id: number,
-    @Body('shortDescription') shortDescription: string,
-    @Body('mortarPerM3') mortarPerM3: string,
-    @Body('consumptionPerM3') consumptionPerM3: string,
-  ) {
-    await this.masonryMaterialService.publish(id, MASONRY_MATERIAL_CURRENT_USER_ID, {
-      shortDescription,
-      mortarPerM3: Number(mortarPerM3),
-      consumptionPerM3: Number(consumptionPerM3),
-    });
-  }
-
-  @Post('delete')
-  @Redirect('/masonry-material/tiles', 302)
-  async delete(@Body('id', ParseIntPipe) id: number) {
-    await this.masonryMaterialService.softDeleteViaRawSql(id);
+  // POST /api/masonry-materials/:id/like — { "value": 1 } или { "value": 0 }
+  @Post(':id/like')
+  @HttpCode(HttpStatus.OK)
+  setLike(@Param('id', ParseIntPipe) id: number, @Body() dto: LikeMasonryMaterialDto) {
+    return this.masonryMaterialService.setLike(id, getMasonryMaterialCurrentUserId(), dto.value);
   }
 }

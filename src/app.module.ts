@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MasonryMaterialModule } from './masonry-material/masonry-material.module';
+import { MasonryMaterialUserModule } from './masonry-material-user/masonry-material-user.module';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { MasonryMaterialModule } from './masonry-material/masonry-material.modul
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         host: config.get('DB_HOST', 'localhost'),
-        port: config.get<number>('DB_PORT', 5432),
+        port: Number(config.get('DB_PORT', 5432)),
         username: config.get('DB_USERNAME'),
         password: config.get('DB_PASSWORD'),
         database: config.get('DB_DATABASE'),
@@ -21,6 +22,7 @@ import { MasonryMaterialModule } from './masonry-material/masonry-material.modul
       }),
     }),
     MasonryMaterialModule,
+    MasonryMaterialUserModule,
   ],
 })
 export class AppModule {}
