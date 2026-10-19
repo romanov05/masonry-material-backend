@@ -10,13 +10,12 @@ export class MasonryMaterialFiltersDto {
   maxConsumption?: number;
 }
 
-// лента: без id — первая услуга, с id — эта услуга, с id и next=true — следующая
+// лента: id обязателен (без параметров — 400); с id — эта услуга, с id и next=true — следующая
 export class MasonryMaterialFeedQueryDto {
-  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  id?: number;
+  id: number;
 
   @IsOptional()
   @Transform(({ value }) => value === true || value === 'true')
