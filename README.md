@@ -18,7 +18,7 @@ npm run start:dev
 | Метод | URL | Запрос | Ответ |
 |---|---|---|---|
 | GET | `/api/masonry-materials?maxConsumption=200` | — | 200, массив услуг (только опубликованные, фильтр «расход ≤ значения») |
-| GET | `/api/masonry-materials/feed?id=2&next=true` | — | 200, одна опубликованная услуга: с `id` — эта, с `id` и `next=true` — следующая по кругу; 400 — без `id` (без параметров метод не работает); 404 |
+| GET | `/api/masonry-materials/feed?id=2&next=true` | — | 200, одна опубликованная услуга: `?next=true` без `id` — первая, с `id` — эта, с `id` и `next=true` — следующая по кругу; 400 — без параметров; 404 |
 | GET | `/api/masonry-materials/draft` | — | 200, черновик текущего пользователя; 404, если черновика нет |
 | POST | `/api/masonry-materials` | form-data: `name`, `image` (файл), `video` (файл) | 201, созданный черновик; 400; 409 — черновик уже есть или название занято |
 | PUT | `/api/masonry-materials/:id/publish` | JSON: `shortDescription`, `mortarPerM3`, `consumptionPerM3` | 200, опубликованная услуга; 400; 404 — нет такого черновика у пользователя |

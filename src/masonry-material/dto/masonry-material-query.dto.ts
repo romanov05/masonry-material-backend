@@ -1,5 +1,5 @@
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsInt, IsOptional, Min } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, Min, ValidateIf } from 'class-validator';
 
 // фильтр списка: расход не больше значения ползунка
 export class MasonryMaterialFiltersDto {
@@ -10,12 +10,15 @@ export class MasonryMaterialFiltersDto {
   maxConsumption?: number;
 }
 
-// лента: id обязателен (без параметров — 400); с id — эта услуга, с id и next=true — следующая
+// лента: без параметров — 400; ?next=true без id — первая услуга;
+// ?id= — эта услуга; ?id=&next=true — следующая по кругу
 export class MasonryMaterialFeedQueryDto {
+  // id проверяется, если он передан или если нет next=true (тогда отсутствие id → 400)
+  @ValidateIf((query: MasonryMaterialFeedQueryDto) => query.id !== undefined || query.next !== true)
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  id: number;
+  id?: number;
 
   @IsOptional()
   @Transform(({ value }) => value === true || value === 'true')
