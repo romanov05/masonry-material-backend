@@ -40,7 +40,7 @@ TTL masonry-material-session:<id сессии>
 | Метод | URL | Доступ | Запрос | Ответ |
 |---|---|---|---|---|
 | GET | `/api/masonry-materials?maxConsumption=200` | все | — | 200, массив услуг (только опубликованные, фильтр «расход ≤ значения»); у гостя `isMine` и `isLiked` = 0 |
-| GET | `/api/masonry-materials/feed?id=2&next=true` | все | — | 200, одна опубликованная услуга: с `id` — эта, с `id` и `next=true` — следующая по кругу; 400 — без `id`; 404 |
+| GET | `/api/masonry-materials/feed?id=2&next=true` | все | — | 200, одна опубликованная услуга: `?next=true` без `id` — первая, с `id` — эта, с `id` и `next=true` — следующая по кругу; 400 — без параметров; 404 |
 | GET | `/api/masonry-materials/draft` | с сессией | — | 200, черновик текущего пользователя; 401; 404 — черновика нет |
 | POST | `/api/masonry-materials` | с сессией | form-data: `name`, `image` (файл), `video` (файл) | 201, созданный черновик (создатель — из сессии); 400; 401; 409 — черновик уже есть или название занято |
 | PUT | `/api/masonry-materials/:id/publish` | создатель | JSON: `shortDescription`, `mortarPerM3`, `consumptionPerM3` | 200, опубликованная услуга; 400; 401; 403 — чужая услуга; 404; 409 — уже опубликована |

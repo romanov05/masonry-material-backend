@@ -54,7 +54,10 @@ export class MasonryMaterialService {
       this.materialRepository.findOne({ where: { status: 'published' }, order: { id: 'ASC' } });
 
     let material: MasonryMaterialServiceEntity | null;
-    if (query.next) {
+    if (query.id === undefined) {
+      // id нет только вместе с next=true (без параметров DTO вернёт 400) — первая карточка
+      material = await findFirstPublished();
+    } else if (query.next) {
       material =
         (await this.materialRepository.findOne({
           where: { status: 'published', id: MoreThan(query.id) },
