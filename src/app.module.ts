@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MasonryMaterialModule } from './masonry-material/masonry-material.module';
 import { MasonryMaterialUserModule } from './masonry-material-user/masonry-material-user.module';
+import { MasonryMaterialAuthModule } from './masonry-material-auth/masonry-material-auth.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MasonryMaterialUserModule } from './masonry-material-user/masonry-mater
         synchronize: false,
       }),
     }),
+    MasonryMaterialAuthModule,
     MasonryMaterialModule,
     MasonryMaterialUserModule,
   ],

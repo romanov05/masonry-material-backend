@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, In, LessThanOrEqual, MoreThan, Not, Repository } from 'typeorm';
 import {
@@ -27,10 +32,10 @@ export class MasonryMaterialService {
     private readonly minioService: MasonryMaterialMinioService,
   ) {}
 
-  // GET: список с фильтрацией — только опубликованные
+  // GET: список с фильтрацией — только опубликованные (currentUserId = null — гость)
   async getPublishedList(
     filters: MasonryMaterialFiltersDto,
-    currentUserId: number,
+    currentUserId: number | null,
   ): Promise<MasonryMaterialResponse[]> {
     const where: FindOptionsWhere<MasonryMaterialServiceEntity> = { status: 'published' };
     if (filters.maxConsumption !== undefined) {
@@ -43,7 +48,7 @@ export class MasonryMaterialService {
   // GET: лента — только опубликованные, из БД всегда одна строка (findOne → LIMIT 1)
   async getFeedItem(
     query: MasonryMaterialFeedQueryDto,
-    currentUserId: number,
+    currentUserId: number | null,
   ): Promise<MasonryMaterialResponse> {
     const findFirstPublished = () =>
       this.materialRepository.findOne({ where: { status: 'published' }, order: { id: 'ASC' } });
@@ -124,11 +129,9 @@ export class MasonryMaterialService {
     currentUserId: number,
     dto: PublishMasonryMaterialDto,
   ): Promise<MasonryMaterialResponse> {
-    const draft = await this.materialRepository.findOne({
-      where: { id, creatorId: currentUserId, status: 'draft' },
-    });
-    if (!draft) {
-      throw new NotFoundException();
+    const draft = await this.findOwnMaterial(id, currentUserId); // 404 / 403
+    if (draft.status !== 'draft') {
+      throw new ConflictException(); // 409 — уже опубликована
     }
 
     draft.status = 'published';
@@ -143,12 +146,7 @@ export class MasonryMaterialService {
 
   // DELETE: только soft delete и только свои услуги
   async softDelete(id: number, currentUserId: number): Promise<void> {
-    const material = await this.materialRepository.findOne({
-      where: { id, creatorId: currentUserId, status: Not<MasonryMaterialStatus>('deleted') },
-    });
-    if (!material) {
-      throw new NotFoundException();
-    }
+    await this.findOwnMaterial(id, currentUserId); // 404 / 403
     await this.materialRepository.update({ id }, { status: 'deleted' });
   }
 
@@ -176,13 +174,30 @@ export class MasonryMaterialService {
 
   // ---------- вспомогательные методы ----------
 
+  // услуга, которую может менять только создатель: нет — 404, чужая — 403
+  private async findOwnMaterial(
+    id: number,
+    currentUserId: number,
+  ): Promise<MasonryMaterialServiceEntity> {
+    const material = await this.materialRepository.findOne({
+      where: { id, status: Not<MasonryMaterialStatus>('deleted') },
+    });
+    if (!material) {
+      throw new NotFoundException();
+    }
+    if (material.creatorId !== currentUserId) {
+      throw new ForbiddenException(); // 403 — услуга другого пользователя
+    }
+    return material;
+  }
+
   private findDraftEntity(userId: number): Promise<MasonryMaterialServiceEntity | null> {
     return this.materialRepository.findOne({ where: { creatorId: userId, status: 'draft' } });
   }
 
   private async toResponse(
     material: MasonryMaterialServiceEntity,
-    currentUserId: number,
+    currentUserId: number | null,
   ): Promise<MasonryMaterialResponse> {
     const [response] = await this.toResponses([material], currentUserId);
     return response;
@@ -191,7 +206,7 @@ export class MasonryMaterialService {
   // единый формат ответа: все поля всегда присутствуют, пустые — null
   private async toResponses(
     materials: MasonryMaterialServiceEntity[],
-    currentUserId: number,
+    currentUserId: number | null,
   ): Promise<MasonryMaterialResponse[]> {
     if (materials.length === 0) {
       return [];
@@ -206,10 +221,13 @@ export class MasonryMaterialService {
         .where('materialLike.serviceId IN (:...serviceIds)', { serviceIds })
         .groupBy('materialLike.serviceId')
         .getRawMany<{ serviceId: number; likesCount: string }>(),
-      this.likeRepository.find({
-        select: { serviceId: true },
-        where: { userId: currentUserId, serviceId: In(serviceIds) },
-      }),
+      // у гостя лайков нет
+      currentUserId === null
+        ? Promise.resolve([] as MasonryMaterialLikeEntity[])
+        : this.likeRepository.find({
+            select: { serviceId: true },
+            where: { userId: currentUserId, serviceId: In(serviceIds) },
+          }),
     ]);
 
     const likesCounts = new Map(likesCountRows.map((row) => [Number(row.serviceId), Number(row.likesCount)]));

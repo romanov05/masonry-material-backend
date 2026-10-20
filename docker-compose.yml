@@ -34,6 +34,12 @@ services:
     depends_on:
       - masonry-material-postgres
 
+  masonry-material-redis:
+    container_name: masonry-material-redis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
 volumes:
   masonry-material-minio-data:
   masonry-material-postgres-data:
